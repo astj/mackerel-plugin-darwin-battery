@@ -71,7 +71,7 @@ func (d DarwinBatteryPlugin) FetchMetrics() (map[string]interface{}, error) {
 }
 
 func main() {
-	optPrefix := flag.String("metric-key-prefix", "battery-capacity", "Metric key prefix")
+	optPrefix := flag.String("metric-key-prefix", "battery capacity", "Metric key prefix")
 	optTempfile := flag.String("tempfile", "", "Temp file name")
 	flag.Parse()
 
