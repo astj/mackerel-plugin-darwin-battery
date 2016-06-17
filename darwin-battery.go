@@ -11,7 +11,6 @@ import (
 	mp "github.com/mackerelio/go-mackerel-plugin-helper"
 )
 
-// UptimePlugin mackerel plugin
 type DarwinBatteryPlugin struct {
 	Prefix string
 }
