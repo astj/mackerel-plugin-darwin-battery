@@ -62,7 +62,7 @@ func (d DarwinBatteryPlugin) FetchMetrics() (map[string]interface{}, error) {
 	stat := make(map[string]interface{})
 	cap, fcc, design, err := getMetricsFromPmset()
 	if err != nil {
-		return nil, fmt.Errorf("Faild to fetch uptime metrics: %s", err)
+		return nil, fmt.Errorf("Faild to fetch battery metrics: %s", err)
 	}
 	stat["cap"] = cap
 	stat["fcc"] = fcc
