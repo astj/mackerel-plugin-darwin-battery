@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"io"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -32,16 +33,22 @@ func (d DarwinBatteryPlugin) GraphDefinition() map[string](mp.Graphs) {
 	}
 }
 
-func getMetricsFromPmset() (string, string, string, error) {
+func getStatsReaderFromPmset() (io.Reader, error) {
 	cmd := exec.Command("pmset", "-g", "rawbatt")
 	stdout, err := cmd.StdoutPipe()
-	scanner := bufio.NewScanner(stdout)
+	reader := bufio.NewReader(stdout)
 	err = cmd.Start()
 	if err != nil {
-		return "0", "0", "0", fmt.Errorf("faild to fetch pmset: %s", err)
+		return nil, fmt.Errorf("faild to fetch pmset: %s", err)
 	}
-	i := 0
+	return reader, nil
+}
+
+func ParsePmsetStats(r io.Reader) (map[string]interface{}, error) {
+	stat := make(map[string]interface{})
 	group := [](string){}
+	scanner := bufio.NewScanner(r)
+	i := 0
 	for scanner.Scan() {
 		i++
 		// we need only 2nd line!
@@ -50,22 +57,25 @@ func getMetricsFromPmset() (string, string, string, error) {
 			s := string(line)
 			assined := regexp.MustCompile(`Cap=(\d+): FCC=(\d+); Design=(\d+);`)
 			group = assined.FindStringSubmatch(s)
-
 		}
 	}
-	return group[1], group[2], group[3], nil
+
+	stat["cap"] = group[1]
+	stat["fcc"] = group[2]
+	stat["design"] = group[3]
+	return stat, nil
 }
 
 // FetchMetrics interface for mackerelplugin
 func (d DarwinBatteryPlugin) FetchMetrics() (map[string]interface{}, error) {
-	stat := make(map[string]interface{})
-	cap, fcc, design, err := getMetricsFromPmset()
+	reader, err := getStatsReaderFromPmset()
 	if err != nil {
 		return nil, fmt.Errorf("Faild to fetch battery metrics: %s", err)
 	}
-	stat["cap"] = cap
-	stat["fcc"] = fcc
-	stat["design"] = design
+	stat, err := ParsePmsetStats(reader)
+	if err != nil {
+		return nil, fmt.Errorf("Faild to parse battery metrics: %s", err)
+	}
 	return stat, nil
 }
 
