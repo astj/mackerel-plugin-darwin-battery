@@ -7,7 +7,6 @@ import (
 	"io"
 	"os/exec"
 	"regexp"
-	"strings"
 
 	mp "github.com/mackerelio/go-mackerel-plugin-helper"
 )
@@ -18,11 +17,9 @@ type DarwinBatteryPlugin struct {
 
 // GraphDefinition interface for mackerelplugin
 func (d DarwinBatteryPlugin) GraphDefinition() map[string](mp.Graphs) {
-	labelPrefix := strings.Title(d.Prefix)
-
 	return map[string](mp.Graphs){
 		d.Prefix: mp.Graphs{
-			Label: labelPrefix,
+			Label: "Battery Capacity",
 			Unit:  "integer",
 			Metrics: [](mp.Metrics){
 				mp.Metrics{Name: "cap", Label: "Cap", Type: "uint64"},
