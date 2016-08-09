@@ -30,7 +30,7 @@ func (d DarwinBatteryPlugin) GraphDefinition() map[string](mp.Graphs) {
 	}
 }
 
-func (d DarwinBatteryPlugin) getStatsReaderFromPmset() (io.Reader, error) {
+func (d DarwinBatteryPlugin) getStatsReaderFromPmset() (map[string]interface{}, error) {
 	cmd := exec.Command("pmset", "-g", "rawbatt")
 	stdout, err := cmd.StdoutPipe()
 	reader := bufio.NewReader(stdout)
@@ -38,7 +38,12 @@ func (d DarwinBatteryPlugin) getStatsReaderFromPmset() (io.Reader, error) {
 	if err != nil {
 		return nil, fmt.Errorf("faild to fetch pmset: %s", err)
 	}
-	return reader, nil
+	stat, parseErr := d.ParsePmsetStats(reader)
+	if parseErr != nil {
+		return nil, fmt.Errorf("faild to parse pmset: %s", err)
+	}
+	_ = cmd.Wait()
+	return stat, nil
 }
 
 func (d DarwinBatteryPlugin) ParsePmsetStats(r io.Reader) (map[string]interface{}, error) {
@@ -66,13 +71,9 @@ func (d DarwinBatteryPlugin) ParsePmsetStats(r io.Reader) (map[string]interface{
 
 // FetchMetrics interface for mackerelplugin
 func (d DarwinBatteryPlugin) FetchMetrics() (map[string]interface{}, error) {
-	reader, err := d.getStatsReaderFromPmset()
+	stat, err := d.getStatsReaderFromPmset()
 	if err != nil {
 		return nil, fmt.Errorf("Faild to fetch battery metrics: %s", err)
-	}
-	stat, err := d.ParsePmsetStats(reader)
-	if err != nil {
-		return nil, fmt.Errorf("Faild to parse battery metrics: %s", err)
 	}
 	return stat, nil
 }
