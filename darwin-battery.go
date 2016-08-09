@@ -54,6 +54,7 @@ func (d DarwinBatteryPlugin) ParsePmsetStats(r io.Reader) (map[string]interface{
 			s := string(line)
 			assined := regexp.MustCompile(`Cap=(\d+): FCC=(\d+); Design=(\d+);`)
 			group = assined.FindStringSubmatch(s)
+			break
 		}
 	}
 
