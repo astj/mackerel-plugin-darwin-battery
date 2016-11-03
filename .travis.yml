@@ -1,4 +1,18 @@
 language: go
-
 go:
-  - 1.5
+- 1.7.3
+before_deploy:
+- go get -u github.com/laher/goxc
+- mkdir -p $TRAVIS_BUILD_DIR/dist
+- goxc -d=$TRAVIS_BUILD_DIR/dist -bc=darwin -tasks=clean-destination,xc,archive,rmbin
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: l7UL8Mvq3D3/ewkko7i78ZrS7xZecCW/03aQyydoKJgQqg8LwEXmLJY/WO4rRs1j2i+xXdk6WA2NqJPv7WhKdqlEeQQHWttoEMe9gfVVTmmIyhbmaFPoG+85HdWjC86aKxAHKfrJQfQgdUG1uRDqTsAYf/vs3AzhzNm9O1udjBq9aeKPY15BPLe4eKZWgPQMw+VpW9ffie/hjdhWMMJRXxMv3U78GBbKMmunfvz+OmDNs9lQnbLesRbhk4aU/CmwHtEv9BzzkWKR3zARJdAY9K5kXrTubbpJthgXCMKJQ4h6jieU9KkEdxOH6hyqyLp6+9ULYrpui1UBORariehDxLyGqNvgOdv1Q0u74TbarK+J5YL6trgnorgAirlHtA3cZDAS/CVA5rNJbf/O74dL+bzlWu7BnAMfcc5vrqegSEaPLfhyLnAIuO48TKKpoGmcKk0plZGzpB1UeX4hDw0Q1Q3UylAWpnjGZCb3aSj+GKAWpBbWrJaFA5MRmX4eGUqY+oAzeP3h447nCY0yzlqjUrfdDbUAzObgC7cBHGvLDpQKMO8cDF4o3VcNUsS7sPUnjePbybGO8TSV4HNwi3Jvc70K9rVaz79pS2raoC59+a6hxa67linIzFXKqsiDtyeGCmRMovpItICil7uhZhVGvtyj7kH9lLd/euF9R/AseWg=
+  file_glob: true
+  file: "$TRAVIS_BUILD_DIR/dist/**/*.{tar.gz,zip}"
+  on:
+    tags: true
+    all_branches: true
+    condition: "$TRAVIS_TAG =~ ^version-.*$"
