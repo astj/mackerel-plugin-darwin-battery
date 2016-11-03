@@ -18,7 +18,7 @@ type DarwinBatteryPlugin struct {
 // GraphDefinition interface for mackerelplugin
 func (d DarwinBatteryPlugin) GraphDefinition() map[string](mp.Graphs) {
 	return map[string](mp.Graphs){
-		d.Prefix: mp.Graphs{
+		"": mp.Graphs{
 			Label: "Battery Capacity",
 			Unit:  "integer",
 			Metrics: [](mp.Metrics){
@@ -28,6 +28,11 @@ func (d DarwinBatteryPlugin) GraphDefinition() map[string](mp.Graphs) {
 			},
 		},
 	}
+}
+
+// MetricKeyPrefix is implementation for PluginWithPrefix interface
+func (d DarwinBatteryPlugin) MetricKeyPrefix() string {
+	return d.Prefix
 }
 
 func (d DarwinBatteryPlugin) getStatsReaderFromPmset() (map[string]interface{}, error) {
@@ -88,8 +93,5 @@ func main() {
 	}
 	helper := mp.NewMackerelPlugin(d)
 	helper.Tempfile = *optTempfile
-	if helper.Tempfile == "" {
-		helper.Tempfile = fmt.Sprintf("/tmp/mackerel-plugin-%s", *optPrefix)
-	}
 	helper.Run()
 }
