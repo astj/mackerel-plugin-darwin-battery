@@ -3,3 +3,11 @@ os: osx
 
 go:
   - 1.7.3
+
+install:
+  - go get -t ./...
+  - go get -u github.com/laher/goxc
+
+script:
+  - go test -v ./...
+  - goxc -d=$TRAVIS_BUILD_DIR -bc=darwin -tasks=clean-destination,xc,archive,rmbin
